@@ -13,11 +13,13 @@ import { processTranscript, getAiProvider } from './services/aiService';
 const App: React.FC = () => {
   const { 
     items, 
+    allItems,
     addItem, 
     updateItem, 
     deleteItem, 
     loading: itemsLoading, 
-    error: firestoreError 
+    error: firestoreError,
+    itemsTimeRemaining
   } = useFirestoreItems();
   
   const [isProcessing, setIsProcessing] = useState(false);
@@ -98,6 +100,10 @@ const App: React.FC = () => {
 
   const shoppingItems = useMemo(() => items.filter(item => item.type === ItemType.Shopping), [items]);
   const todoItems = useMemo(() => items.filter(item => item.type === ItemType.Todo), [items]);
+  
+  // Use allItems for header counters to show total count including hidden items
+  const allShoppingItems = useMemo(() => allItems.filter(item => item.type === ItemType.Shopping), [allItems]);
+  const allTodoItems = useMemo(() => allItems.filter(item => item.type === ItemType.Todo), [allItems]);
 
   return (
     <div className="min-h-screen max-w-lg mx-auto flex flex-col font-sans p-4 pb-32 bg-gray-50">
@@ -115,8 +121,20 @@ const App: React.FC = () => {
                 <p>Toca el micrófono para añadir algo.</p>
             </div>
         )}
-        <ShoppingList items={shoppingItems} onToggleDone={toggleItemDone} onDelete={handleDeleteItem} />
-        <TodoList items={todoItems} onToggleDone={toggleItemDone} onDelete={handleDeleteItem} />
+        <ShoppingList 
+          items={shoppingItems} 
+          allItems={allShoppingItems}
+          onToggleDone={toggleItemDone} 
+          onDelete={handleDeleteItem} 
+          itemsTimeRemaining={itemsTimeRemaining}
+        />
+        <TodoList 
+          items={todoItems} 
+          allItems={allTodoItems}
+          onToggleDone={toggleItemDone} 
+          onDelete={handleDeleteItem} 
+          itemsTimeRemaining={itemsTimeRemaining}
+        />
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 flex justify-center items-center p-6 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent">

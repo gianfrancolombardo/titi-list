@@ -5,12 +5,11 @@ import { processTranscriptWithOpenAI } from './openaiService';
 export type AiProvider = 'gemini' | 'openai' | 'none';
 
 export const getAiProvider = (): AiProvider => {
-    // fix: Use process.env to access environment variables, resolving TypeScript error.
-    if (process.env.API_KEY) {
+    // Fix: Use import.meta.env for Vite environment variables
+    if (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY) {
         return 'gemini';
     }
-    // fix: Use process.env to access environment variables, resolving TypeScript error.
-    if (process.env.VITE_OPENAI_API_KEY) {
+    if (import.meta.env.VITE_OPENAI_API_KEY) {
         return 'openai';
     }
     return 'none';
@@ -28,8 +27,8 @@ export const processTranscript = async (transcript: string): Promise<Omit<Item, 
             return processTranscriptWithOpenAI(transcript);
         case 'none':
             console.error("No AI provider API key configured.");
-            // fix: Update error message to reflect use of process.env.API_KEY for Gemini.
-            throw new Error("No AI API key found. Please set API_KEY (for Gemini) or VITE_OPENAI_API_KEY.");
+            // Fix: Update error message to reflect correct environment variable names
+            throw new Error("No AI API key found. Please set VITE_GEMINI_API_KEY (for Gemini) or VITE_OPENAI_API_KEY (for OpenAI).");
         default:
             throw new Error("Invalid AI provider specified.");
     }

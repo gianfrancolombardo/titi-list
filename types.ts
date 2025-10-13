@@ -20,4 +20,5 @@ export interface Item {
   done: boolean;
   quadrant?: Quadrant;
   createdAt: number;
+  completedAt?: number; // Timestamp when item was marked as done
 }

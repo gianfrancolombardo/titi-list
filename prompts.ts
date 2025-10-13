@@ -12,7 +12,7 @@ export const GEMINI_PROMPTS = {
 
   schemaDescriptions: {
     type: "Classify as 'shopping' for purchasing items or 'todo' for actions.",
-    title: "A short, clear title for the item. Be concise.",
+    title: "A short, clear title for the item. Be concise. For shopping items, use only the item name without verbs like 'comprar' (e.g., 'leche' instead of 'comprar leche').",
     note: "Optional details, context, or notes. Keep it brief.",
     quantity: "Optional quantity for 'shopping' items (e.g., '2 liters', '1 dozen').",
     quadrant: quadrantDescription

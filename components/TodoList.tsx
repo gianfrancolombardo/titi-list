@@ -6,12 +6,18 @@ import { CheckSquareIcon, ChevronDownIcon } from './icons';
 
 interface TodoListProps {
   items: Item[];
+  allItems: Item[];
   onToggleDone: (id: string, currentDone: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  itemsTimeRemaining: Map<string, number>;
 }
 
-export const TodoList: React.FC<TodoListProps> = ({ items, onToggleDone, onDelete }) => {
+export const TodoList: React.FC<TodoListProps> = ({ items, allItems, onToggleDone, onDelete, itemsTimeRemaining }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Calculate counters for title
+  const undoneCount = useMemo(() => allItems.filter(item => !item.done).length, [allItems]);
+  const totalCount = allItems.length;
 
   const groupedItems = useMemo(() => {
     return items.reduce((acc, item) => {
@@ -41,7 +47,14 @@ export const TodoList: React.FC<TodoListProps> = ({ items, onToggleDone, onDelet
       >
         <div className="flex items-center">
             <CheckSquareIcon />
-            <h2 className="ml-2">Lista de Tareas</h2>
+            <h2 className="ml-2">
+              Lista de Tareas
+              {totalCount > 0 && (
+                <span className="text-sm font-normal text-gray-500 ml-1">
+                  ({undoneCount}/{totalCount})
+                </span>
+              )}
+            </h2>
         </div>
         <ChevronDownIcon className={`transform transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
       </button>
@@ -59,7 +72,13 @@ export const TodoList: React.FC<TodoListProps> = ({ items, onToggleDone, onDelet
                 <h3 className={`text-sm font-medium ${details.textColor} px-2 mb-1`}>{details.label}</h3>
                 <div className="flex flex-col gap-2">
                     {quadrantItems.map(item => (
-                        <ListItem key={item.id} item={item} onToggleDone={onToggleDone} onDelete={onDelete} />
+                        <ListItem 
+                          key={item.id} 
+                          item={item} 
+                          onToggleDone={onToggleDone} 
+                          onDelete={onDelete} 
+                          timeRemaining={itemsTimeRemaining.get(item.id)}
+                        />
                     ))}
                 </div>
               </div>
