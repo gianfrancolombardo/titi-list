@@ -1,7 +1,13 @@
 import React from 'react';
-import { Item, ItemType } from '../types';
+import { Item, ItemType, Quadrant } from '../types';
 import { QUADRANT_DETAILS } from '../constants';
-import { TrashIcon } from './icons';
+import { 
+  TrashIcon, 
+  UrgentImportantIcon, 
+  UrgentNotImportantIcon, 
+  NotUrgentImportantIcon, 
+  NotUrgentNotImportantIcon 
+} from './icons';
 
 interface ListItemProps {
   item: Item;
@@ -9,6 +15,22 @@ interface ListItemProps {
   onDelete: (id: string) => void;
   timeRemaining?: number;
 }
+
+// Helper function to get the appropriate icon for each quadrant
+const getQuadrantIcon = (quadrant: Quadrant) => {
+  switch (quadrant) {
+    case Quadrant.UrgentImportant:
+      return <UrgentImportantIcon />;
+    case Quadrant.UrgentNotImportant:
+      return <UrgentNotImportantIcon />;
+    case Quadrant.NotUrgentImportant:
+      return <NotUrgentImportantIcon />;
+    case Quadrant.NotUrgentNotImportant:
+      return <NotUrgentNotImportantIcon />;
+    default:
+      return null;
+  }
+};
 
 export const ListItem: React.FC<ListItemProps> = ({ item, onToggleDone, onDelete, timeRemaining }) => {
   const isShopping = item.type === ItemType.Shopping;
@@ -36,7 +58,7 @@ export const ListItem: React.FC<ListItemProps> = ({ item, onToggleDone, onDelete
   const visualFeedback = getVisualFeedback();
 
   return (
-    <div className="relative">
+    <div className="relative animate-fadeIn">
       {/* Progress bar for completed items */}
       {item.done && timeRemaining && (
         <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 rounded-t-lg overflow-hidden">
@@ -48,18 +70,21 @@ export const ListItem: React.FC<ListItemProps> = ({ item, onToggleDone, onDelete
       )}
       
       <div 
-        className={`${baseClasses} ${stateClasses} ${item.done && timeRemaining ? 'relative' : ''}`}
-        style={visualFeedback.opacity ? { opacity: visualFeedback.opacity } : {}}
+        className={`${baseClasses} ${stateClasses} ${item.done && timeRemaining ? 'relative' : ''} transition-smooth hover-scale hover:shadow-md`}
+        style={visualFeedback.opacity ? { 
+          opacity: visualFeedback.opacity,
+          transform: visualFeedback.isDisappearing ? 'scale(0.95)' : 'scale(1)'
+        } : {}}
       >
         <input
           type="checkbox"
           checked={item.done}
           onChange={() => onToggleDone(item.id, item.done)}
-          className="h-5 w-5 rounded-md border-gray-300 focus:ring-blue-400 accent-blue-500"
+          className="h-5 w-5 rounded-md border-gray-300 focus:ring-blue-400 accent-blue-500 transition-smooth hover-scale-sm"
         />
         <div className="flex-grow ml-3">
           <p className={`font-medium ${item.done ? 'line-through' : ''}`}>{item.title}</p>
-          {(item.quantity || item.note) && (
+          {(item.quantity || (item.note && item.note.trim())) && (
             <p className="text-sm text-gray-500">{item.quantity} {item.note}</p>
           )}
           {/* Show countdown in last 5 seconds */}
@@ -70,13 +95,16 @@ export const ListItem: React.FC<ListItemProps> = ({ item, onToggleDone, onDelete
           )}
         </div>
 
-        {!isShopping && quadrantDetails && !item.done && (
-           <span className={`text-xs font-semibold mr-3 px-2 py-1 rounded-full ${quadrantDetails.color} ${quadrantDetails.textColor}`}>
-              {QUADRANT_DETAILS[item.quadrant!].label.split(',')[0]}
-          </span>
+        {!isShopping && item.quadrant && !item.done && (
+          <div className="mr-3 p-1 rounded-lg bg-gray-50">
+            {getQuadrantIcon(item.quadrant)}
+          </div>
         )}
         
-        <button onClick={() => onDelete(item.id)} className="ml-2 p-1 text-gray-400 hover:text-red-500 rounded-full focus:outline-none focus:ring-2 focus:ring-red-400">
+        <button 
+          onClick={() => onDelete(item.id)} 
+          className="ml-2 p-1 text-gray-400 hover:text-red-500 rounded-full focus:outline-none focus:ring-2 focus:ring-red-400 transition-smooth hover-scale-sm hover:bg-red-50"
+        >
           <TrashIcon />
         </button>
       </div>

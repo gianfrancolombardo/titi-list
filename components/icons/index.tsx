@@ -62,3 +62,20 @@ export const ListChecksIcon: React.FC = () => (
         <path d="M13 18h8"/>
     </svg>
 );
+
+// Eisenhower Matrix Color Coded Icons
+export const UrgentImportantIcon: React.FC = () => (
+    <div className="w-4 h-4 rounded-full bg-red-500"></div>
+);
+
+export const UrgentNotImportantIcon: React.FC = () => (
+    <div className="w-4 h-4 rounded-full bg-orange-500"></div>
+);
+
+export const NotUrgentImportantIcon: React.FC = () => (
+    <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+);
+
+export const NotUrgentNotImportantIcon: React.FC = () => (
+    <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+);

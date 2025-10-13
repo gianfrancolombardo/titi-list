@@ -148,10 +148,16 @@ const App: React.FC = () => {
        <div className="fixed bottom-6 right-6">
             <button
                 onClick={() => setShowManualAdd(!showManualAdd)}
-                className="w-14 h-14 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-600 transition-transform transform hover:scale-105"
+                className={`w-14 h-14 rounded-full text-white flex items-center justify-center shadow-lg transition-slow hover-scale-lg focus:outline-none focus:ring-4 focus:ring-opacity-50 ${
+                  showManualAdd 
+                    ? 'bg-red-500 hover:bg-red-600 focus:ring-red-400' 
+                    : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-400'
+                }`}
                 aria-label={showManualAdd ? 'Cerrar añadido manual' : 'Abrir añadido manual'}
             >
-                {showManualAdd ? <XIcon /> : <PlusIcon />}
+                <div className={`transition-slow ${showManualAdd ? 'rotate-180' : ''}`}>
+                  {showManualAdd ? <XIcon /> : <PlusIcon />}
+                </div>
             </button>
         </div>
 

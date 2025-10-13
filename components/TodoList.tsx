@@ -42,7 +42,7 @@ export const TodoList: React.FC<TodoListProps> = ({ items, allItems, onToggleDon
   return (
     <section>
       <button 
-        className="w-full flex items-center justify-between text-left text-xl font-semibold text-gray-600 mb-2 py-2"
+        className="w-full flex items-center justify-between text-left text-xl font-semibold text-gray-600 mb-2 py-2 hover:bg-gray-50 rounded-lg transition-all duration-200 hover:scale-[1.01]"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <div className="flex items-center">
@@ -56,11 +56,11 @@ export const TodoList: React.FC<TodoListProps> = ({ items, allItems, onToggleDon
               )}
             </h2>
         </div>
-        <ChevronDownIcon className={`transform transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+        <ChevronDownIcon className={`transform transition-transform duration-300 ease-in-out ${isCollapsed ? '-rotate-90' : ''}`} />
       </button>
 
       {!isCollapsed && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 animate-slideInFromTop">
           {quadrantOrder.map(quadrant => {
             const quadrantItems = groupedItems[quadrant] || [];
             if (quadrantItems.length === 0) return null;

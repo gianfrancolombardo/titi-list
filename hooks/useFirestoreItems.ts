@@ -96,14 +96,17 @@ export function useFirestoreItems() {
           }, 100);
           intervalIds.push(intervalId);
 
-          // Hide item after 15 seconds
+          // Hide item after 15 seconds with smooth animation
           const timeoutId = setTimeout(() => {
-            setHiddenItems(prev => new Set([...prev, item.id]));
-            setItemsTimeRemaining(prev => {
-              const newMap = new Map(prev);
-              newMap.delete(item.id);
-              return newMap;
-            });
+            // Add a small delay for smooth exit animation
+            setTimeout(() => {
+              setHiddenItems(prev => new Set([...prev, item.id]));
+              setItemsTimeRemaining(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(item.id);
+                return newMap;
+              });
+            }, 300); // 300ms delay for exit animation
           }, remainingTime);
           timeoutIds.push(timeoutId);
         } else {
