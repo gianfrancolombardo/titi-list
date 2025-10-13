@@ -1,0 +1,7 @@
+{
+  "name": "Titi List",
+  "description": "A minimalist, voice-first shopping and to-do list manager powered by AI. Speak your tasks, and the app intelligently organizes them for you.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
