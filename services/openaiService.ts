@@ -4,8 +4,9 @@ import { OPENAI_PROMPTS } from '../prompts';
 const API_URL = 'https://api.openai.com/v1/chat/completions';
 
 export const processTranscriptWithOpenAI = async (transcript: string): Promise<Omit<Item, 'id' | 'done' | 'createdAt'>[] | null> => {
-    if (!process.env.OPENAI_API_KEY) {
-        throw new Error("OPENAI_API_KEY environment variable not set");
+    // fix: Use process.env to access environment variables to resolve TypeScript error.
+    if (!process.env.VITE_OPENAI_API_KEY) {
+        throw new Error("VITE_OPENAI_API_KEY environment variable not set");
     }
 
     try {
@@ -13,7 +14,8 @@ export const processTranscriptWithOpenAI = async (transcript: string): Promise<O
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                // fix: Use process.env to access environment variables to resolve TypeScript error.
+                'Authorization': `Bearer ${process.env.VITE_OPENAI_API_KEY}`
             },
             body: JSON.stringify({
                 model: 'gpt-4o-mini',

@@ -34,7 +34,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (getAiProvider() === 'none') {
-        setError("No hay clave de API. Configura una para usar la app.");
+        setError("Configura VITE_API_KEY o VITE_OPENAI_API_KEY.");
     }
     if (firestoreError) {
         setError(firestoreError);

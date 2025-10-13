@@ -36,9 +36,11 @@ const responseSchema = {
 
 
 export const processTranscriptWithGemini = async (transcript: string): Promise<Omit<Item, 'id' | 'done' | 'createdAt'>[] | null> => {
+  // fix: Use process.env.API_KEY as per @google/genai guidelines to resolve TypeScript error.
   if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable not set");
   }
+  // fix: Use process.env.API_KEY as per @google/genai guidelines to resolve TypeScript error.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   try {

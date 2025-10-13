@@ -46,31 +46,19 @@ Para una aplicación real, deberías:
 ### Lógica del proveedor de IA
 La aplicación seleccionará el proveedor de IA con la siguiente prioridad:
 1.  **Google Gemini**: Si se proporciona una `API_KEY`.
-2.  **OpenAI**: Si no hay clave de Gemini, pero se proporciona una `OPENAI_API_KEY`.
+2.  **OpenAI**: Si no hay clave de Gemini, pero se proporciona una `VITE_OPENAI_API_KEY`.
 
 ### Pasos para la Compilación
 
 **1. Configurar las variables de entorno:**
 
-Crea un archivo llamado `.env` en la raíz del proyecto y añade la configuración de Firebase (obtenida de `FIREBASE_SETUP.md`) y tus claves de API.
-
+Copia el archivo de ejemplo `.env.example` a un nuevo archivo llamado `.env`:
+```bash
+cp .env.example .env
 ```
-# --- Configuración de Firebase (OBLIGATORIA) ---
-VITE_FIREBASE_API_KEY="TU_FIREBASE_API_KEY"
-VITE_FIREBASE_AUTH_DOMAIN="TU_PROYECTO.firebaseapp.com"
-VITE_FIREBASE_PROJECT_ID="TU_PROYECTO_ID"
-VITE_FIREBASE_STORAGE_BUCKET="TU_PROYECTO.appspot.com"
-VITE_FIREBASE_MESSAGING_SENDER_ID="TU_SENDER_ID"
-VITE_FIREBASE_APP_ID="TU_APP_ID"
+Luego, abre el archivo `.env` y rellena los valores con tu configuración de Firebase (obtenida de `FIREBASE_SETUP.md`) y tus claves de API.
 
-# --- Configuración de IA (Necesitas al menos una) ---
-# Para Google Gemini (tiene prioridad)
-VITE_API_KEY=TU_API_KEY_DE_GEMINI_AQUI
-
-# Para OpenAI (se usará si la de Gemini no está)
-VITE_OPENAI_API_KEY=TU_API_KEY_DE_OPENAI_AQUI
-```
-*Nota: Este proyecto asume un entorno Vite (`VITE_` prefix). Si usas Create React App, el prefijo sería `REACT_APP_`.*
+*Nota: El archivo `.env` es ignorado por Git para mantener tus claves seguras.*
 
 **2. Instalar dependencias:**
 
