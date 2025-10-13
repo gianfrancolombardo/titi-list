@@ -3,18 +3,13 @@ import * as firebaseApp from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  // fix: Use process.env to access environment variables to resolve TypeScript error.
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  // fix: Use process.env to access environment variables to resolve TypeScript error.
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-  // fix: Use process.env to access environment variables to resolve TypeScript error.
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  // fix: Use process.env to access environment variables to resolve TypeScript error.
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-  // fix: Use process.env to access environment variables to resolve TypeScript error.
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  // fix: Use process.env to access environment variables to resolve TypeScript error.
-  appId: process.env.VITE_FIREBASE_APP_ID,
+  // Fix: Use import.meta.env for Vite environment variables
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 let app: firebaseApp.FirebaseApp;
