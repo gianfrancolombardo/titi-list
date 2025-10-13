@@ -7,38 +7,39 @@ A minimalist, voice-first shopping and to-do list manager powered by AI. Speak y
 - **Framework:** React con TypeScript
 - **Styling:** Tailwind CSS
 - **AI:** Google Gemini API (`@google/genai`) or OpenAI API
+- **Base de Datos:** Google Firebase Firestore (para persistencia y sincronización en tiempo real)
 - **Speech Recognition:** Web Speech API
 
 ---
 
 ## ¿Se necesita un Backend?
 
-**Respuesta corta:** No, esta aplicación funciona **exclusivamente en el frontend**.
+**Respuesta corta:** No, esta aplicación funciona **exclusivamente en el frontend**, conectándose directamente a los servicios de Google (AI y Firestore).
 
 **Explicación importante:**
-La aplicación realiza llamadas a la API de Gemini u OpenAI directamente desde el navegador del cliente. Para que esto funcione, la clave de la API (`API_KEY` para Gemini o `OPENAI_API_KEY` para OpenAI) debe estar disponible en el código del frontend.
+La aplicación realiza llamadas a las APIs de IA y Firestore directamente desde el navegador del cliente. Para que esto funcione, las claves de las APIs deben estar disponibles en el código del frontend.
 
 **⚠️ Advertencia de Seguridad ⚠️**
-Exponer tu clave de API en el lado del cliente es **altamente inseguro y no se recomienda para aplicaciones en producción**. Cualquier persona podría inspeccionar el código de tu web, encontrar tu clave y usarla para hacer peticiones a la API, lo que podría generar costos inesperados en tu cuenta.
+Exponer tus claves de API en el lado del cliente es **altamente inseguro y no se recomienda para aplicaciones en producción**.
+
+- **Claves de IA (Gemini/OpenAI):** Cualquier persona podría inspeccionar el código de tu web, encontrar tu clave y usarla, lo que podría generar costos inesperados en tu cuenta.
+- **Configuración de Firebase:** La configuración de Firebase en sí misma no es secreta, pero para proteger tu base de datos, debes configurar las **Reglas de Seguridad de Firestore**. Para este proyecto, se utiliza una configuración permisiva para facilitar el desarrollo, pero **en producción, debes restringir el acceso solo a usuarios autenticados**.
 
 **Solución recomendada para producción:**
-Para una aplicación real, deberías crear un **backend simple** (por ejemplo, usando Node.js con Express, o una función serverless como Firebase Functions, Netlify Functions o Vercel Edge Functions). El flujo sería:
-1.  El frontend (esta app) envía el texto a tu backend.
-2.  Tu backend, que tiene la clave de API guardada de forma segura como una variable de entorno del servidor, realiza la llamada a la API de IA correspondiente.
-3.  Tu backend recibe la respuesta y la reenvía al frontend.
-
-De esta manera, la clave de API nunca sale de tu servidor y permanece segura.
+Para una aplicación real, deberías:
+1.  **Añadir Autenticación:** Usa Firebase Authentication para que los usuarios inicien sesión.
+2.  **Asegurar las Reglas de Firestore:** Modifica tus reglas para que solo los usuarios autenticados puedan leer y escribir sus propios datos.
+3.  **Proteger la Clave de IA:** Crea un **backend simple** (por ejemplo, con Firebase Functions) que actúe como intermediario para las llamadas a la API de IA. De esta manera, la clave de IA nunca se expone en el cliente.
 
 ---
 
 ## Cómo compilar y desplegar la aplicación
 
-Dado que esta es una aplicación de solo frontend, puedes alojarla en cualquier servicio de hosting de sitios estáticos.
-
 ### Prerrequisitos
 - [Node.js](https://nodejs.org/) (versión 18 o superior)
 - Un gestor de paquetes como `npm` o `yarn`.
-- Una clave de API de Google Gemini y/o OpenAI.
+- **Una cuenta de Firebase:** Necesitarás configurar un proyecto de Firebase. Sigue las instrucciones en [**FIREBASE_SETUP.md**](./FIREBASE_SETUP.md).
+- **Una clave de API de IA (opcional, pero recomendado):**
   - Gemini: Puedes obtenerla en [Google AI Studio](https://aistudio.google.com/app/apikey).
   - OpenAI: Puedes obtenerla en [OpenAI Platform](https://platform.openai.com/api-keys).
 
@@ -49,20 +50,27 @@ La aplicación seleccionará el proveedor de IA con la siguiente prioridad:
 
 ### Pasos para la Compilación
 
-Esta aplicación está configurada para funcionar sin un paso de compilación explícito, pero para un despliegue real, necesitarías un `bundler` como Vite o Webpack. Asumiendo un proyecto estándar de React con Vite:
-
 **1. Configurar las variables de entorno:**
 
-Crea un archivo llamado `.env` en la raíz del proyecto y añade tus claves de API. Solo necesitas una de las dos, pero puedes añadir ambas.
+Crea un archivo llamado `.env` en la raíz del proyecto y añade la configuración de Firebase (obtenida de `FIREBASE_SETUP.md`) y tus claves de API.
 
 ```
+# --- Configuración de Firebase (OBLIGATORIA) ---
+VITE_FIREBASE_API_KEY="TU_FIREBASE_API_KEY"
+VITE_FIREBASE_AUTH_DOMAIN="TU_PROYECTO.firebaseapp.com"
+VITE_FIREBASE_PROJECT_ID="TU_PROYECTO_ID"
+VITE_FIREBASE_STORAGE_BUCKET="TU_PROYECTO.appspot.com"
+VITE_FIREBASE_MESSAGING_SENDER_ID="TU_SENDER_ID"
+VITE_FIREBASE_APP_ID="TU_APP_ID"
+
+# --- Configuración de IA (Necesitas al menos una) ---
 # Para Google Gemini (tiene prioridad)
 VITE_API_KEY=TU_API_KEY_DE_GEMINI_AQUI
 
 # Para OpenAI (se usará si la de Gemini no está)
 VITE_OPENAI_API_KEY=TU_API_KEY_DE_OPENAI_AQUI
 ```
-*Nota: Si usas Create React App, el prefijo sería `REACT_APP_` en lugar de `VITE_`.*
+*Nota: Este proyecto asume un entorno Vite (`VITE_` prefix). Si usas Create React App, el prefijo sería `REACT_APP_`.*
 
 **2. Instalar dependencias:**
 
@@ -72,38 +80,18 @@ npm install
 ```
 
 **3. Compilar la aplicación:**
-
-Ejecuta el comando para compilar los archivos para producción. Esto creará una carpeta `dist` (o `build`).
 ```bash
 npm run build
 ```
 
-### Opciones de Despliegue
-
-#### Opción 1: Desplegar en Netlify
+### Opciones de Despliegue (Ej: Netlify)
 
 1.  **Sube tu proyecto a un repositorio Git** (GitHub, GitLab, etc.).
 2.  **Crea una cuenta en Netlify** y selecciona "Add new site" -> "Import an existing project".
-3.  **Conecta tu repositorio Git**.
-4.  **Configura los ajustes de compilación:**
+3.  **Configura los ajustes de compilación:**
     -   **Build command:** `npm run build`
-    -   **Publish directory:** `dist` (o `build`)
-5.  **Añade tus variables de entorno:**
+    -   **Publish directory:** `dist`
+4.  **Añade tus variables de entorno:**
     -   Ve a "Site configuration" -> "Environment variables".
-    -   Añade una variable con la clave `VITE_API_KEY` y el valor de tu clave de Gemini.
-    -   Añade otra variable con `VITE_OPENAI_API_KEY` y el valor de tu clave de OpenAI.
-6.  **Haz clic en "Deploy site"**.
-
-#### Opción 2: Desplegar en Firebase Hosting
-
-1.  **Instala las herramientas de Firebase CLI:** `npm install -g firebase-tools`
-2.  **Inicia sesión:** `firebase login`
-3.  **Inicia Firebase en tu proyecto:** `firebase init hosting`
-    -   Selecciona un proyecto de Firebase.
-    -   Directorio público: `dist` (o `build`).
-    -   Configurar como SPA: `Sí`.
-4.  **Despliega la aplicación:**
-    -   Primero, compila tu proyecto: `npm run build`.
-    -   Luego, despliega: `firebase deploy --only hosting`
-
-**Nota sobre la API Key en Firebase Hosting:** Al igual que con Netlify, deberías usar Firebase Functions para proteger tu clave de API en un entorno de producción. Desplegarla directamente en el hosting estático la expondrá. Para configurar variables de entorno para Functions, usarías `firebase functions:config:set my_app.api_key="KEY"`.
+    -   Añade **TODAS** las variables de tu archivo `.env`.
+5.  **Haz clic en "Deploy site"**.

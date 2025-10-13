@@ -5,8 +5,8 @@ import { ChevronDownIcon, ShoppingCartIcon } from './icons';
 
 interface ShoppingListProps {
   items: Item[];
-  onToggleDone: (id: string) => void;
-  onDelete: (id: string) => void;
+  onToggleDone: (id: string, currentDone: boolean) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }
 
 export const ShoppingList: React.FC<ShoppingListProps> = ({ items, onToggleDone, onDelete }) => {

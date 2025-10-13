@@ -6,8 +6,8 @@ import { CheckSquareIcon, ChevronDownIcon } from './icons';
 
 interface TodoListProps {
   items: Item[];
-  onToggleDone: (id: string) => void;
-  onDelete: (id: string) => void;
+  onToggleDone: (id: string, currentDone: boolean) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }
 
 export const TodoList: React.FC<TodoListProps> = ({ items, onToggleDone, onDelete }) => {

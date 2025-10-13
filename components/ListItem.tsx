@@ -5,7 +5,7 @@ import { TrashIcon } from './icons';
 
 interface ListItemProps {
   item: Item;
-  onToggleDone: (id: string) => void;
+  onToggleDone: (id: string, currentDone: boolean) => void;
   onDelete: (id: string) => void;
 }
 
@@ -23,7 +23,7 @@ export const ListItem: React.FC<ListItemProps> = ({ item, onToggleDone, onDelete
       <input
         type="checkbox"
         checked={item.done}
-        onChange={() => onToggleDone(item.id)}
+        onChange={() => onToggleDone(item.id, item.done)}
         className="h-5 w-5 rounded-md border-gray-300 focus:ring-blue-400 accent-blue-500"
       />
       <div className="flex-grow ml-3">
