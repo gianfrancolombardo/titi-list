@@ -1,7 +1,7 @@
 import { Item } from '../types';
 import { OPENAI_PROMPTS } from '../prompts';
 
-const API_URL = 'https://api.openai.com/v1/chat/completions';
+const API_URL = '/api/openai/v1/chat/completions';
 
 export const processTranscriptWithOpenAI = async (transcript: string): Promise<Omit<Item, 'id' | 'done' | 'createdAt'>[] | null> => {
     // fix: Use process.env to access environment variables to resolve TypeScript error.
@@ -18,7 +18,7 @@ export const processTranscriptWithOpenAI = async (transcript: string): Promise<O
                 'Authorization': `Bearer ${process.env.VITE_OPENAI_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'gpt-5-mini',
+                model: 'gpt-4o-mini',
                 messages: [
                     { role: 'system', content: OPENAI_PROMPTS.systemInstruction },
                     { role: 'user', content: transcript }

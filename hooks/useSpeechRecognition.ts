@@ -99,8 +99,19 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
     };
     
     recognition.onend = () => {
-        if (recognitionRef.current) { // only set isListening to false if it wasn't manually stopped
-          setIsListening(false);
+        // If still listening (user hasn't manually stopped), restart the recognition
+        // This prevents automatic stopping due to silence detection
+        if (isListening) {
+          setTimeout(() => {
+            if (recognitionRef.current && isListening) {
+              try {
+                recognitionRef.current.start();
+              } catch (err) {
+                console.error("Auto-restart failed:", err);
+                setIsListening(false);
+              }
+            }
+          }, 100);
         }
     };
 
@@ -121,6 +132,18 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       } catch (err) {
         console.error("Speech recognition start error:", err);
         setError("No se pudo iniciar el reconocimiento. ¿Está permitido el uso del micrófono?");
+      }
+    }
+  }, [isListening]);
+
+  const restartListening = useCallback(() => {
+    if (recognitionRef.current && isListening) {
+      try {
+        recognitionRef.current.start();
+      } catch (err) {
+        console.error("Speech recognition restart error:", err);
+        // If restart fails, stop listening
+        setIsListening(false);
       }
     }
   }, [isListening]);

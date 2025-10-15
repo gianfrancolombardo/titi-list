@@ -20,14 +20,10 @@ export const processTranscript = async (transcript: string): Promise<Omit<Item, 
 
     switch (provider) {
         case 'gemini':
-            console.log("Using Gemini API");
             return processTranscriptWithGemini(transcript);
         case 'openai':
-            console.log("Using OpenAI API");
             return processTranscriptWithOpenAI(transcript);
         case 'none':
-            console.error("No AI provider API key configured.");
-            // Fix: Update error message to reflect correct environment variable names
             throw new Error("No AI API key found. Please set VITE_GEMINI_API_KEY (for Gemini) or VITE_OPENAI_API_KEY (for OpenAI).");
         default:
             throw new Error("Invalid AI provider specified.");

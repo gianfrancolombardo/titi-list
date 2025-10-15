@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useFirestoreItems } from './hooks/useFirestoreItems';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
+import { useToast } from './hooks/useToast';
 import { Item, ItemType } from './types';
 import { Header } from './components/Header';
 import { RecordButton } from './components/RecordButton';
 import { ShoppingList } from './components/ShoppingList';
 import { TodoList } from './components/TodoList';
 import { ManualAddInput } from './components/ManualAddInput';
+import { ToastContainer } from './components/ToastContainer';
 import { PlusIcon, XIcon } from './components/icons';
 import { processTranscript, getAiProvider } from './services/aiService';
 
@@ -23,8 +25,8 @@ const App: React.FC = () => {
   } = useFirestoreItems();
   
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showManualAdd, setShowManualAdd] = useState(false);
+  const { toasts, showToast, hideToast } = useToast();
   
   const {
     isListening,
@@ -36,12 +38,12 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (getAiProvider() === 'none') {
-        setError("Configura VITE_API_KEY o VITE_OPENAI_API_KEY.");
+        showToast("Configura VITE_API_KEY o VITE_OPENAI_API_KEY.", 'error');
     }
     if (firestoreError) {
-        setError(firestoreError);
+        showToast(firestoreError, 'error');
     }
-  }, [firestoreError]);
+  }, [firestoreError, showToast]);
 
   const handleNewItems = useCallback(async (newItemsData: Omit<Item, 'id' | 'done' | 'createdAt'>[]) => {
     // Basic deduplication against existing items
@@ -56,26 +58,28 @@ const App: React.FC = () => {
 
   const processAndAddItems = useCallback(async (text: string) => {
     if (!text.trim()) return;
+    
     setIsProcessing(true);
-    setError(null);
+    
     try {
       const processedItems = await processTranscript(text);
+      
       if (processedItems && processedItems.length > 0) {
         await handleNewItems(processedItems);
       } else {
-        setError("No te entendí bien. ¿Podrías intentarlo de nuevo?");
+        showToast("No te entendí bien. ¿Podrías intentarlo de nuevo?", 'error');
       }
     } catch (e) {
-      console.error(e);
+      console.error('Error processing transcript:', e);
       if (e instanceof Error && e.message.includes("No AI API key found")) {
-        setError("Por favor, configura una clave de API para Gemini u OpenAI.");
+        showToast("Por favor, configura una clave de API para Gemini u OpenAI.", 'error');
       } else {
-        setError("Lo siento, algo salió mal. Por favor, inténtalo de nuevo.");
+        showToast("Lo siento, algo salió mal. Por favor, inténtalo de nuevo.", 'error');
       }
     } finally {
       setIsProcessing(false);
     }
-  }, [handleNewItems]);
+  }, [handleNewItems, showToast]);
 
   useEffect(() => {
     if (transcript && !isListening && !isProcessing) {
@@ -86,9 +90,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (speechError) {
-      setError(`Error de voz: ${speechError}`);
+      showToast(`Error de voz: ${speechError}`, 'error');
     }
-  }, [speechError]);
+  }, [speechError, showToast]);
   
   const toggleItemDone = async (id: string, currentDone: boolean) => {
     await updateItem(id, { done: !currentDone });
@@ -140,7 +144,6 @@ const App: React.FC = () => {
       <div className="fixed bottom-0 left-0 right-0 flex justify-center items-center p-6 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent">
         <div className="relative flex flex-col items-center">
             {isProcessing && <p className="text-sm text-gray-500 absolute -top-6 animate-pulse">Procesando...</p>}
-            {error && !isProcessing && <p className="text-sm text-red-500 absolute -top-6">{error}</p>}
             <RecordButton isListening={isListening} onStart={startListening} onStop={stopListening} />
         </div>
       </div>
@@ -170,6 +173,8 @@ const App: React.FC = () => {
                 onClose={() => setShowManualAdd(false)}
             />
         )}
+
+        <ToastContainer toasts={toasts} onClose={hideToast} />
     </div>
   );
 };
