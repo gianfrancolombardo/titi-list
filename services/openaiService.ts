@@ -18,7 +18,7 @@ export const processTranscriptWithOpenAI = async (transcript: string): Promise<O
                 'Authorization': `Bearer ${process.env.VITE_OPENAI_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'gpt-4o-mini',
+                model: 'gpt-5-mini',
                 messages: [
                     { role: 'system', content: OPENAI_PROMPTS.systemInstruction },
                     { role: 'user', content: transcript }
