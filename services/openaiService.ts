@@ -10,6 +10,23 @@ export const processTranscriptWithOpenAI = async (transcript: string): Promise<O
     }
 
     try {
+        const payload = {
+            model: 'gpt-5-mini',
+            messages: [
+                { role: 'system', content: OPENAI_PROMPTS.systemInstruction },
+                { role: 'user', content: transcript }
+            ],
+            tools: [OPENAI_PROMPTS.toolDefinition],
+            tool_choice: { type: "function", function: { name: "add_list_items" } },
+        };
+
+        console.info('[AI][OpenAI] Sending prompt:', {
+            model: payload.model,
+            systemPromptExcerpt: OPENAI_PROMPTS.systemInstruction.slice(0, 120),
+            userContent: transcript,
+            toolName: OPENAI_PROMPTS.toolDefinition.function.name,
+        });
+
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -17,15 +34,7 @@ export const processTranscriptWithOpenAI = async (transcript: string): Promise<O
                 // fix: Use process.env to access environment variables to resolve TypeScript error.
                 'Authorization': `Bearer ${process.env.VITE_OPENAI_API_KEY}`
             },
-            body: JSON.stringify({
-                model: 'gpt-5-mini',
-                messages: [
-                    { role: 'system', content: OPENAI_PROMPTS.systemInstruction },
-                    { role: 'user', content: transcript }
-                ],
-                tools: [OPENAI_PROMPTS.toolDefinition],
-                tool_choice: { type: "function", function: { name: "add_list_items" } },
-            })
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
@@ -39,6 +48,7 @@ export const processTranscriptWithOpenAI = async (transcript: string): Promise<O
 
         if (toolCall && toolCall.function.name === 'add_list_items') {
             const args = JSON.parse(toolCall.function.arguments);
+            console.info('[AI][OpenAI] Tool call response:', args);
             return Array.isArray(args.items) ? args.items : null;
         }
         

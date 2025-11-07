@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useFirestoreItems } from './hooks/useFirestoreItems';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 import { useToast } from './hooks/useToast';
@@ -34,6 +34,11 @@ const App: React.FC = () => {
     startListening,
     stopListening,
     error: speechError,
+    isModelLoading: isLoadingSpeechModel,
+    usingLocalModel,
+    isSupported: speechSupported,
+    statusMessage,
+    statusLevel,
   } = useSpeechRecognition();
 
   useEffect(() => {
@@ -60,9 +65,11 @@ const App: React.FC = () => {
     if (!text.trim()) return;
     
     setIsProcessing(true);
+    console.info('[Speech] Transcript ready for AI:', text);
     
     try {
       const processedItems = await processTranscript(text);
+      console.info('[AI] Processed items response:', processedItems);
       
       if (processedItems && processedItems.length > 0) {
         await handleNewItems(processedItems);
@@ -89,10 +96,30 @@ const App: React.FC = () => {
   }, [transcript, isListening]);
 
   useEffect(() => {
-    if (speechError) {
+    if (!speechSupported) {
+      showToast('El reconocimiento de voz no es compatible en este dispositivo.', 'error');
+    } else if (speechError) {
       showToast(`Error de voz: ${speechError}`, 'error');
     }
-  }, [speechError, showToast]);
+  }, [speechError, showToast, speechSupported]);
+
+  const lastStatusRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (statusMessage && statusMessage !== lastStatusRef.current) {
+      showToast(statusMessage, statusLevel ?? 'info', 2500);
+      lastStatusRef.current = statusMessage;
+    } else if (!statusMessage) {
+      lastStatusRef.current = null;
+    }
+  }, [showToast, statusLevel, statusMessage]);
+
+  const isProcessingRef = useRef(false);
+  useEffect(() => {
+    if (isProcessing && !isProcessingRef.current) {
+      showToast('Procesando la lista con IA…', 'info', 2200);
+    }
+    isProcessingRef.current = isProcessing;
+  }, [isProcessing, showToast]);
   
   const toggleItemDone = async (id: string, currentDone: boolean) => {
     await updateItem(id, { done: !currentDone });
@@ -143,8 +170,18 @@ const App: React.FC = () => {
 
       <div className="fixed bottom-0 left-0 right-0 flex justify-center items-center p-6 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent">
         <div className="relative flex flex-col items-center">
-            {isProcessing && <p className="text-sm text-gray-500 absolute -top-6 animate-pulse">Procesando...</p>}
-            <RecordButton isListening={isListening} onStart={startListening} onStop={stopListening} />
+            {(isProcessing || statusMessage) && (
+              <p className="text-sm text-gray-500 absolute -top-6 animate-pulse">
+                {isProcessing ? 'Procesando...' : statusMessage}
+              </p>
+            )}
+            <RecordButton
+              isListening={isListening}
+              onStart={startListening}
+              onStop={stopListening}
+              disabled={!speechSupported || isProcessing || (isLoadingSpeechModel && !isListening)}
+              mode={usingLocalModel ? 'local' : 'web'}
+            />
         </div>
       </div>
       

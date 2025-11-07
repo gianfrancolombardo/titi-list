@@ -44,9 +44,16 @@ export const processTranscriptWithGemini = async (transcript: string): Promise<O
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   try {
+    const contents = GEMINI_PROMPTS.mainContent(transcript);
+    console.info('[AI][Gemini] Sending prompt:', {
+      model: 'gemini-2.5-flash',
+      systemInstructionExcerpt: GEMINI_PROMPTS.systemInstruction.slice(0, 120),
+      userContent: transcript,
+    });
+
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: GEMINI_PROMPTS.mainContent(transcript),
+      contents,
       config: {
         responseMimeType: "application/json",
         responseSchema: responseSchema,
@@ -57,6 +64,7 @@ export const processTranscriptWithGemini = async (transcript: string): Promise<O
     const jsonText = response.text.trim();
     if (jsonText) {
       const parsed = JSON.parse(jsonText);
+      console.info('[AI][Gemini] Parsed response:', parsed);
       return Array.isArray(parsed) ? parsed : null;
     }
     return null;

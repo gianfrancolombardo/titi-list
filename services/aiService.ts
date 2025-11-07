@@ -17,6 +17,7 @@ export const getAiProvider = (): AiProvider => {
 
 export const processTranscript = async (transcript: string): Promise<Omit<Item, 'id' | 'done' | 'createdAt'>[] | null> => {
     const provider = getAiProvider();
+    console.info('[AI] Selected provider:', provider);
 
     switch (provider) {
         case 'gemini':
