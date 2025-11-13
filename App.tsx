@@ -34,6 +34,8 @@ const App: React.FC = () => {
     startListening,
     stopListening,
     error: speechError,
+    isTranscribing,
+    status,
   } = useSpeechRecognition();
 
   useEffect(() => {
@@ -56,17 +58,30 @@ const App: React.FC = () => {
     }
   }, [items, addItem]);
 
+  useEffect(() => {
+    console.info('[App] Whisper status', status);
+  }, [status]);
+
   const processAndAddItems = useCallback(async (text: string) => {
-    if (!text.trim()) return;
+    const trimmed = text.trim();
+    if (!trimmed) {
+      console.warn('[App] Empty transcript received, skipping AI processing');
+      showToast("No detecté palabras claras en el audio.", 'error');
+      return;
+    }
+    console.info('[App] Sending transcript to AI pipeline', trimmed);
     
     setIsProcessing(true);
     
     try {
-      const processedItems = await processTranscript(text);
+      const processedItems = await processTranscript(trimmed);
       
       if (processedItems && processedItems.length > 0) {
+        console.info('[App] AI produced items', processedItems);
         await handleNewItems(processedItems);
+        console.info('[App] Items added to Firestore', processedItems.length);
       } else {
+        console.warn('[App] AI did not return items');
         showToast("No te entendí bien. ¿Podrías intentarlo de nuevo?", 'error');
       }
     } catch (e) {
@@ -81,15 +96,25 @@ const App: React.FC = () => {
     }
   }, [handleNewItems, showToast]);
 
+  const handleStartRecording = useCallback(() => {
+    startListening();
+  }, [startListening]);
+
+  const handleStopRecording = useCallback(() => {
+    stopListening();
+  }, [stopListening]);
+
   useEffect(() => {
-    if (transcript && !isListening && !isProcessing) {
-      processAndAddItems(transcript);
+    if (transcript && !isListening && !isProcessing && !isTranscribing) {
+      console.info('[App] Transcript ready for processing', transcript);
+      void processAndAddItems(transcript);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transcript, isListening]);
+  }, [transcript, isListening, isTranscribing]);
 
   useEffect(() => {
     if (speechError) {
+      console.error('[App] Speech hook error', speechError);
       showToast(`Error de voz: ${speechError}`, 'error');
     }
   }, [speechError, showToast]);
@@ -143,8 +168,13 @@ const App: React.FC = () => {
 
       <div className="fixed bottom-0 left-0 right-0 flex justify-center items-center p-6 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent">
         <div className="relative flex flex-col items-center">
-            {isProcessing && <p className="text-sm text-gray-500 absolute -top-6 animate-pulse">Procesando...</p>}
-            <RecordButton isListening={isListening} onStart={startListening} onStop={stopListening} />
+            <RecordButton
+              isListening={isListening}
+              onStart={handleStartRecording}
+              onStop={handleStopRecording}
+              disabled={isTranscribing || isProcessing}
+              isBusy={isTranscribing || isProcessing}
+            />
         </div>
       </div>
       

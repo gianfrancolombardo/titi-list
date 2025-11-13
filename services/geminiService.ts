@@ -56,6 +56,7 @@ export const processTranscriptWithGemini = async (transcript: string): Promise<O
 
     const jsonText = response.text.trim();
     if (jsonText) {
+      console.info('[Gemini] Agent textual response', jsonText);
       const parsed = JSON.parse(jsonText);
       return Array.isArray(parsed) ? parsed : null;
     }

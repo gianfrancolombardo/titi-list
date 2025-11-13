@@ -17,10 +17,6 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, allItems, onT
 
   const activeItems = useMemo(() => items.filter(item => !item.done), [items]);
   const purchasedItems = useMemo(() => items.filter(item => item.done), [items]);
-  
-  // Calculate counters for title
-  const undoneCount = useMemo(() => allItems.filter(item => !item.done).length, [allItems]);
-  const totalCount = allItems.length;
 
   if (items.length === 0) return null;
 
@@ -32,14 +28,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, allItems, onT
       >
         <div className="flex items-center">
             <ShoppingCartIcon />
-            <h2 className="ml-2">
-              Lista de Compras
-              {totalCount > 0 && (
-                <span className="text-sm font-normal text-gray-500 ml-1">
-                  ({undoneCount}/{totalCount})
-                </span>
-              )}
-            </h2>
+            <h2 className="ml-2">Lista de Compras</h2>
         </div>
         <ChevronDownIcon className={`transform transition-transform duration-300 ease-in-out ${isCollapsed ? '-rotate-90' : ''}`} />
       </button>
